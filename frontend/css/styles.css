@@ -1,0 +1,90 @@
+:root {
+  --zenith-primary: #1f3b73;
+  --zenith-primary-dark: #16294f;
+  --zenith-accent: #2ecc71;
+  --zenith-alert: #e74c3c;
+  --zenith-bg: #f4f4f6;
+}
+
+body {
+  background-color: var(--zenith-bg);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.navbar-zenith {
+  background-color: var(--zenith-primary);
+}
+
+.navbar-zenith .navbar-brand,
+.navbar-zenith .nav-link {
+  color: #ffffff !important;
+}
+
+.navbar-zenith .nav-link.active {
+  font-weight: 600;
+  border-bottom: 2px solid var(--zenith-accent);
+}
+
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--zenith-primary), var(--zenith-primary-dark));
+}
+
+.login-card {
+  max-width: 420px;
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.badge-stage {
+  font-size: 0.75rem;
+}
+
+.pipeline-column {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.75rem;
+  min-height: 200px;
+  border: 1px solid #e5e5e5;
+}
+
+.pipeline-card {
+  border-left: 4px solid var(--zenith-primary);
+  cursor: default;
+}
+
+.pipeline-card.stage-Ganado {
+  border-left-color: var(--zenith-accent);
+}
+
+.pipeline-card.stage-Perdido {
+  border-left-color: var(--zenith-alert);
+}
+
+.alert-card.vencido {
+  border-left: 4px solid var(--zenith-alert);
+}
+
+.alert-card.pendiente {
+  border-left: 4px solid #f39c12;
+}
+
+.brand-icon {
+  font-size: 1.5rem;
+  color: var(--zenith-accent);
+}
+
+.stat-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.role-badge {
+  text-transform: capitalize;
+}

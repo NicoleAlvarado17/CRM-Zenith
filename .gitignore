@@ -1,0 +1,18 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Variables de entorno (nunca subir credenciales reales)
+.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+*.log
+
+# Editores
+.vscode/
+.idea/
