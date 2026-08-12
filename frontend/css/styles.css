@@ -4,11 +4,41 @@
   --zenith-accent: #2ecc71;
   --zenith-alert: #e74c3c;
   --zenith-bg: #f4f4f6;
+
+  --font-titulos-primarios: "Montserrat", sans-serif;
+  --font-titulos-secundarios: "Montserrat", sans-serif;
+  --font-texto: "Roboto", sans-serif;
+  --font-acentos: "Roboto", sans-serif;
 }
 
 body {
   background-color: var(--zenith-bg);
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: var(--font-texto);
+  font-weight: 400;
+}
+
+h1,
+h2,
+.navbar-brand {
+  font-family: var(--font-titulos-primarios);
+  font-weight: 700;
+}
+
+h3,
+h4,
+h5,
+h6,
+.card-header,
+.card-title {
+  font-family: var(--font-titulos-secundarios);
+  font-weight: 600;
+}
+
+a,
+.nav-link,
+.btn {
+  font-family: var(--font-acentos);
+  font-weight: 500;
 }
 
 .navbar-zenith {
