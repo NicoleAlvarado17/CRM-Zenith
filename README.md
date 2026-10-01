@@ -2,19 +2,21 @@
 
 Sistema de Gestión de Relaciones con el Cliente desarrollado para **Zenith Soluciones Digitales**, como parte de los cursos SC-702 (Diseño y Desarrollo de Sistemas) y SC-803 (Implantación de Sistemas) de la Universidad Fidélitas.
 
-**Autoras:** Nicole Alvarado Meoño · Sofía Fiorella Arana González · Valery Sofía Vargas Castillo
+**Autora:** Nicole Alvarado Meoño
 
 Este repositorio implementa técnicamente la arquitectura definida en el Documento de Arquitectura (Escenario 2: Node.js + Express + MongoDB Atlas + Vue.js), construida a partir de los requerimientos funcionales y no funcionales definidos en el documento AN01.
 
 ## Módulos implementados
 
-| Módulo | Historias de Usuario | Estado |
-|---|---|---|
-| Gestión de Clientes | HU-01, HU-02, HU-03 | ✅ |
-| Pipeline Comercial | HU-04, HU-05, HU-06 | ✅ |
-| Bitácora Técnica | HU-07, HU-08, HU-09 | ✅ |
-| Alertas de Mantenimiento | HU-10, HU-11, HU-12 | ✅ |
-| Reportes | HU-13, HU-14, HU-15 | ✅ |
+| Módulo | Historias de Usuario | Sprint | Estado |
+|---|---|---|---|
+| Gestión de Clientes | HU-01, HU-02, HU-03 | 1 | ✅ Entregado |
+| Pipeline Comercial | HU-04, HU-05, HU-06 | 2 | 🔜 Planificado |
+| Bitácora Técnica | HU-07, HU-08, HU-09 | 3 | 🔜 Planificado |
+| Alertas de Mantenimiento | HU-10, HU-11, HU-12 | 3 | 🔜 Planificado |
+| Reportes | HU-13, HU-14, HU-15 | 4 | 🔜 Planificado |
+
+> El código base del repositorio incluye un primer borrador de todos los módulos para validar la arquitectura de forma temprana, pero cada módulo se revisa, prueba y documenta formalmente en el sprint que le corresponde según la Tabla de planificación del proyecto. El estado de esta tabla refleja ese avance formal por sprint, no el código presente en el repositorio.
 
 ## Estructura del proyecto
 
