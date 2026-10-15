@@ -97,7 +97,7 @@ const PipelineView = {
 
       <div v-if="loading" class="text-center py-4"><span class="spinner-border"></span></div>
 
-      <div v-else class="row g-2">
+      <div v-else class="row g-2 pipeline-row">
         <div class="col" v-for="stage in stages" :key="stage">
           <div class="pipeline-column">
             <h6 class="text-center mb-2">
