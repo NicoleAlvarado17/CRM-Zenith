@@ -1,7 +1,7 @@
 // Modulo centralizado de comunicacion con el backend (API REST).
 // Ver seccion 4.5.1 del Documento de Arquitectura: interfaz Frontend <-> Backend.
 
-const API_BASE_URL = "http://localhost:4000/api";
+const API_BASE_URL = "https://crm-zenith-backend.onrender.com/api";
 
 const ApiClient = {
   getToken() {
