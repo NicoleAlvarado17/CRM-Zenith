@@ -11,7 +11,7 @@ Este repositorio implementa técnicamente la arquitectura definida en el Documen
 | Módulo | Historias de Usuario | Sprint | Estado |
 |---|---|---|---|
 | Gestión de Clientes | HU-01, HU-02, HU-03 | 1 | ✅ Entregado |
-| Pipeline Comercial | HU-04, HU-05, HU-06 | 2 | 🔜 Planificado |
+| Pipeline Comercial | HU-04, HU-05, HU-06 | 2 | ✅ Entregado |
 | Bitácora Técnica | HU-07, HU-08, HU-09 | 3 | 🔜 Planificado |
 | Alertas de Mantenimiento | HU-10, HU-11, HU-12 | 3 | 🔜 Planificado |
 | Reportes | HU-13, HU-14, HU-15 | 4 | 🔜 Planificado |
