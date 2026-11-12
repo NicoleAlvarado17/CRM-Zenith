@@ -14,6 +14,11 @@ const ClientsView = {
       historial: null,
       showHistorial: false,
       historialClientName: "",
+      // Busqueda, filtro y paginacion del listado (correccion de evaluacion)
+      searchQuery: "",
+      filterService: "",
+      currentPage: 1,
+      pageSize: 8,
     };
   },
   computed: {
@@ -22,6 +27,35 @@ const ClientsView = {
     },
     canDelete() {
       return this.user.role === "administrador";
+    },
+    filteredClients() {
+      const q = this.searchQuery.trim().toLowerCase();
+      return this.clients.filter((client) => {
+        const matchesQuery =
+          !q ||
+          client.name.toLowerCase().includes(q) ||
+          (client.contactName || "").toLowerCase().includes(q) ||
+          client.email.toLowerCase().includes(q) ||
+          (client.phone || "").toLowerCase().includes(q);
+        const matchesService =
+          !this.filterService || (client.servicesContracted || []).includes(this.filterService);
+        return matchesQuery && matchesService;
+      });
+    },
+    totalPages() {
+      return Math.max(1, Math.ceil(this.filteredClients.length / this.pageSize));
+    },
+    paginatedClients() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      return this.filteredClients.slice(start, start + this.pageSize);
+    },
+  },
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    filterService() {
+      this.currentPage = 1;
     },
   },
   mounted() {
@@ -116,8 +150,8 @@ const ClientsView = {
   },
   template: `
     <div>
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4><i class="bi bi-people-fill me-2"></i>Gestion de Clientes</h4>
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 action-toolbar">
+        <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i>Gestion de Clientes</h4>
         <button v-if="canEdit" class="btn btn-primary" @click="openCreateModal">
           <i class="bi bi-plus-lg"></i> Nuevo cliente
         </button>
@@ -130,44 +164,70 @@ const ClientsView = {
         <span class="spinner-border"></span>
       </div>
 
-      <div v-else class="table-responsive bg-white rounded shadow-sm p-2">
-        <table class="table table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Contacto</th>
-              <th>Correo</th>
-              <th>Telefono</th>
-              <th>Servicios</th>
-              <th class="text-end">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="clients.length === 0">
-              <td colspan="6" class="text-center text-muted py-3">No hay clientes registrados todavia</td>
-            </tr>
-            <tr v-for="client in clients" :key="client._id">
-              <td class="fw-semibold">{{ client.name }}</td>
-              <td>{{ client.contactName || '-' }}</td>
-              <td>{{ client.email }}</td>
-              <td>{{ client.phone }}</td>
-              <td>
-                <span v-for="s in client.servicesContracted" :key="s" class="badge bg-secondary me-1">{{ s }}</span>
-              </td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-info me-1" @click="viewHistorial(client)" title="Ver historial tecnico">
-                  <i class="bi bi-clock-history"></i>
-                </button>
-                <button v-if="canEdit" class="btn btn-sm btn-outline-primary me-1" @click="openEditModal(client)" title="Editar">
-                  <i class="bi bi-pencil-fill"></i>
-                </button>
-                <button v-if="canDelete" class="btn btn-sm btn-outline-danger" @click="removeClient(client)" title="Eliminar">
-                  <i class="bi bi-trash-fill"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-else class="bg-white rounded shadow-sm p-2">
+        <!-- Buscador y filtro (correccion de evaluacion: toda tabla debe tener buscador y filtros) -->
+        <div class="d-flex flex-wrap gap-2 align-items-center p-2 table-toolbar">
+          <div class="input-group input-group-sm" style="max-width: 300px">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nombre, correo o telefono"
+              v-model="searchQuery"
+            />
+          </div>
+          <select class="form-select form-select-sm" style="max-width: 220px" v-model="filterService">
+            <option value="">Todos los servicios</option>
+            <option v-for="s in servicesOptions" :key="s" :value="s">{{ s }}</option>
+          </select>
+          <span class="text-muted small ms-auto">{{ filteredClients.length }} cliente(s) encontrado(s)</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Contacto</th>
+                <th>Correo</th>
+                <th>Telefono</th>
+                <th>Servicios</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="filteredClients.length === 0">
+                <td colspan="6" class="text-center text-muted py-3">
+                  No se encontraron clientes con los filtros seleccionados
+                </td>
+              </tr>
+              <tr v-for="client in paginatedClients" :key="client._id">
+                <td class="fw-semibold">{{ client.name }}</td>
+                <td>{{ client.contactName || '-' }}</td>
+                <td>{{ client.email }}</td>
+                <td>{{ client.phone }}</td>
+                <td>
+                  <span v-for="s in client.servicesContracted" :key="s" class="badge bg-secondary me-1">{{ s }}</span>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex action-buttons">
+                    <button class="btn btn-sm btn-outline-info" @click="viewHistorial(client)">
+                      <i class="bi bi-clock-history me-1"></i>Historial
+                    </button>
+                    <button v-if="canEdit" class="btn btn-sm btn-outline-primary" @click="openEditModal(client)">
+                      <i class="bi bi-pencil-fill me-1"></i>Editar
+                    </button>
+                    <button v-if="canDelete" class="btn btn-sm btn-outline-danger" @click="removeClient(client)">
+                      <i class="bi bi-trash-fill me-1"></i>Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <pagination-bar :current-page="currentPage" :total-pages="totalPages" @change="currentPage = $event"></pagination-bar>
       </div>
 
       <!-- Modal crear/editar cliente -->
@@ -213,8 +273,8 @@ const ClientsView = {
                     <textarea class="form-control" v-model="form.notes" rows="2"></textarea>
                   </div>
                 </div>
-                <div class="mt-4 text-end">
-                  <button type="button" class="btn btn-secondary me-2" @click="closeModal">Cancelar</button>
+                <div class="mt-4 text-end action-buttons d-flex justify-content-end">
+                  <button type="button" class="btn btn-secondary" @click="closeModal">Cancelar</button>
                   <button type="submit" class="btn btn-primary">Guardar cliente</button>
                 </div>
               </form>

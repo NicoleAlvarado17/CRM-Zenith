@@ -53,4 +53,9 @@ const App = {
   `,
 };
 
-Vue.createApp(App).mount("#app");
+const zenithApp = Vue.createApp(App);
+// Registro global: PaginationBar se usa dentro de varios modulos
+// (clientes, bitacora, alertas, reportes) sin tener que declararla
+// como componente local en cada uno.
+zenithApp.component("pagination-bar", PaginationBar);
+zenithApp.mount("#app");

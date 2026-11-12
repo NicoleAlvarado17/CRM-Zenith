@@ -13,6 +13,10 @@ const PipelineView = {
       form: { client: "", title: "", serviceType: "Pagina Web", amount: 0 },
       serviceOptions: ["Pagina Web", "Sistema a la Medida", "Codigo QR", "Hosting", "Mantenimiento"],
       message: "",
+      searchQuery: "",
+      // Estado del arrastre (correccion de evaluacion: el cambio de etapa debe ser drag and drop)
+      draggedOpportunity: null,
+      dragOverStage: null,
     };
   },
   computed: {
@@ -50,6 +54,16 @@ const PipelineView = {
         this.loading = false;
       }
     },
+    opportunitiesByStage(stage) {
+      const list = this.pipeline[stage] || [];
+      const q = this.searchQuery.trim().toLowerCase();
+      if (!q) return list;
+      return list.filter(
+        (op) =>
+          op.title.toLowerCase().includes(q) ||
+          (op.client && op.client.name && op.client.name.toLowerCase().includes(q))
+      );
+    },
     openCreateModal() {
       this.form = { client: this.clients[0] ? this.clients[0]._id : "", title: "", serviceType: "Pagina Web", amount: 0 };
       this.showModal = true;
@@ -65,18 +79,35 @@ const PipelineView = {
         this.errorMsg = error.message;
       }
     },
-    async moveStage(opportunity, direction) {
-      const currentIndex = this.stages.indexOf(opportunity.stage);
-      const nextIndex = currentIndex + direction;
-      if (nextIndex < 0 || nextIndex >= this.stages.length) return;
-
-      const nextStage = this.stages[nextIndex];
+    // Cambia la etapa de una oportunidad, ya sea por arrastre o por el selector accesible
+    async changeStage(opportunity, newStage) {
+      if (!newStage || newStage === opportunity.stage) return;
       try {
-        await ApiClient.updateOpportunityStage(opportunity._id, nextStage);
+        await ApiClient.updateOpportunityStage(opportunity._id, newStage);
         await this.loadPipeline();
       } catch (error) {
         this.errorMsg = error.message;
       }
+    },
+    onDragStart(op, event) {
+      if (!this.canEdit) return;
+      this.draggedOpportunity = op;
+      event.dataTransfer.effectAllowed = "move";
+    },
+    onDragEnd() {
+      this.draggedOpportunity = null;
+      this.dragOverStage = null;
+    },
+    onDragEnterColumn(stage) {
+      if (!this.canEdit || !this.draggedOpportunity) return;
+      this.dragOverStage = stage;
+    },
+    async onDropColumn(stage) {
+      this.dragOverStage = null;
+      if (!this.canEdit || !this.draggedOpportunity) return;
+      const opportunity = this.draggedOpportunity;
+      this.draggedOpportunity = null;
+      await this.changeStage(opportunity, stage);
     },
     formatMoney(amount) {
       return new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC" }).format(amount || 0);
@@ -84,8 +115,8 @@ const PipelineView = {
   },
   template: `
     <div>
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4><i class="bi bi-kanban-fill me-2"></i>Pipeline Comercial</h4>
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 action-toolbar">
+        <h4 class="mb-0"><i class="bi bi-kanban-fill me-2"></i>Pipeline Comercial</h4>
         <button v-if="canEdit" class="btn btn-primary" @click="openCreateModal">
           <i class="bi bi-plus-lg"></i> Nueva oportunidad
         </button>
@@ -95,33 +126,59 @@ const PipelineView = {
       <div v-if="errorMsg" class="alert alert-danger py-2">{{ errorMsg }}</div>
       <div v-if="message" class="alert alert-info py-2">{{ message }}</div>
 
+      <div v-if="!loading && !message" class="d-flex flex-wrap gap-2 align-items-center mb-2 table-toolbar bg-white rounded shadow-sm p-2">
+        <div class="input-group input-group-sm" style="max-width: 300px">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" placeholder="Buscar oportunidad o cliente" v-model="searchQuery" />
+        </div>
+        <span class="text-muted small">
+          <i class="bi bi-arrows-move me-1"></i>Arrastre una tarjeta a otra columna para cambiar su etapa,
+          o use el selector "Cambiar etapa" de cada tarjeta.
+        </span>
+      </div>
+
       <div v-if="loading" class="text-center py-4"><span class="spinner-border"></span></div>
 
       <div v-else class="row g-2 pipeline-row">
         <div class="col" v-for="stage in stages" :key="stage">
-          <div class="pipeline-column">
+          <div
+            class="pipeline-column"
+            :class="{ 'drag-over': dragOverStage === stage }"
+            @dragover.prevent="onDragEnterColumn(stage)"
+            @dragleave="dragOverStage = null"
+            @drop.prevent="onDropColumn(stage)"
+          >
             <h6 class="text-center mb-2">
               {{ stage }}
-              <span class="badge bg-secondary">{{ (pipeline[stage] || []).length }}</span>
+              <span class="badge bg-secondary">{{ opportunitiesByStage(stage).length }}</span>
             </h6>
             <div
               class="card mb-2 p-2 pipeline-card"
-              :class="'stage-' + stage.replace(' ', '')"
-              v-for="op in (pipeline[stage] || [])"
+              :class="[ 'stage-' + stage.replace(' ', ''), { 'pipeline-card-draggable': canEdit, dragging: draggedOpportunity === op } ]"
+              :draggable="canEdit"
+              v-for="op in opportunitiesByStage(stage)"
               :key="op._id"
+              @dragstart="onDragStart(op, $event)"
+              @dragend="onDragEnd"
             >
               <div class="fw-semibold small">{{ op.title }}</div>
               <div class="text-muted small">{{ op.client ? op.client.name : 'Sin cliente' }}</div>
               <div class="small">{{ formatMoney(op.amount) }}</div>
-              <div class="d-flex justify-content-between mt-1" v-if="canEdit">
-                <button class="btn btn-sm btn-outline-secondary" @click="moveStage(op, -1)" title="Etapa anterior">
-                  <i class="bi bi-arrow-left"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" @click="moveStage(op, 1)" title="Siguiente etapa">
-                  <i class="bi bi-arrow-right"></i>
-                </button>
+              <div class="mt-2" v-if="canEdit">
+                <label class="form-label small text-muted mb-1">Cambiar etapa:</label>
+                <select
+                  class="form-select form-select-sm"
+                  :value="op.stage"
+                  @change="changeStage(op, $event.target.value)"
+                  @mousedown.stop
+                >
+                  <option v-for="s in stages" :key="s" :value="s">{{ s }}</option>
+                </select>
               </div>
             </div>
+            <p v-if="opportunitiesByStage(stage).length === 0" class="text-center text-muted small mb-0">
+              Sin oportunidades
+            </p>
           </div>
         </div>
       </div>
@@ -157,8 +214,8 @@ const PipelineView = {
                   <label class="form-label">Monto estimado (CRC)</label>
                   <input type="number" min="0" class="form-control" v-model.number="form.amount" />
                 </div>
-                <div class="text-end">
-                  <button type="button" class="btn btn-secondary me-2" @click="showModal = false">Cancelar</button>
+                <div class="text-end action-buttons d-flex justify-content-end">
+                  <button type="button" class="btn btn-secondary" @click="showModal = false">Cancelar</button>
                   <button type="submit" class="btn btn-primary">Guardar oportunidad</button>
                 </div>
               </form>

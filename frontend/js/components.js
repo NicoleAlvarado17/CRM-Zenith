@@ -79,7 +79,7 @@ const NavBar = {
       <span class="navbar-brand fw-bold">
         <i class="bi bi-diagram-3-fill me-2"></i>CRM Zenith
       </span>
-      <div class="d-flex flex-wrap gap-1">
+      <div class="d-flex flex-wrap gap-2 nav-tabs-wrapper">
         <button
           v-for="tab in tabs"
           :key="tab.key"
@@ -97,6 +97,43 @@ const NavBar = {
           <i class="bi bi-box-arrow-right"></i> Salir
         </button>
       </div>
+    </nav>
+  `,
+};
+
+// Componente reutilizable: barra de paginacion.
+// Se usa en los listados/tablas de los distintos modulos (clientes, bitacora,
+// alertas, reportes) para no repetir la misma logica de botones en cada vista.
+const PaginationBar = {
+  props: {
+    currentPage: { type: Number, required: true },
+    totalPages: { type: Number, required: true },
+  },
+  emits: ["change"],
+  computed: {
+    pages() {
+      const pages = [];
+      for (let p = 1; p <= this.totalPages; p++) pages.push(p);
+      return pages;
+    },
+  },
+  template: `
+    <nav v-if="totalPages > 1" class="d-flex justify-content-center mt-3" aria-label="Paginacion">
+      <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center">
+        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <button class="page-link" @click="$emit('change', currentPage - 1)" aria-label="Pagina anterior">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+        </li>
+        <li class="page-item" v-for="p in pages" :key="p" :class="{ active: p === currentPage }">
+          <button class="page-link" @click="$emit('change', p)">{{ p }}</button>
+        </li>
+        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+          <button class="page-link" @click="$emit('change', currentPage + 1)" aria-label="Pagina siguiente">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </li>
+      </ul>
     </nav>
   `,
 };

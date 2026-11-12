@@ -13,12 +13,39 @@ const BitacoraView = {
       form: { client: "", type: "Reunion", description: "" },
       typeOptions: ["Reunion", "Llamada", "Correo", "Requerimiento", "Otro"],
       filterClient: "",
+      // Buscador y paginacion del listado (correccion de evaluacion)
+      searchQuery: "",
+      currentPage: 1,
+      pageSize: 6,
     };
   },
   computed: {
     filteredEntries() {
-      if (!this.filterClient) return this.entries;
-      return this.entries.filter((e) => e.client && e.client._id === this.filterClient);
+      const q = this.searchQuery.trim().toLowerCase();
+      return this.entries.filter((e) => {
+        const matchesClient = !this.filterClient || (e.client && e.client._id === this.filterClient);
+        const matchesQuery =
+          !q ||
+          (e.description || "").toLowerCase().includes(q) ||
+          (e.type || "").toLowerCase().includes(q) ||
+          (e.client && e.client.name && e.client.name.toLowerCase().includes(q));
+        return matchesClient && matchesQuery;
+      });
+    },
+    totalPages() {
+      return Math.max(1, Math.ceil(this.filteredEntries.length / this.pageSize));
+    },
+    paginatedEntries() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      return this.filteredEntries.slice(start, start + this.pageSize);
+    },
+  },
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    filterClient() {
+      this.currentPage = 1;
     },
   },
   mounted() {
@@ -69,24 +96,42 @@ const BitacoraView = {
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString("es-CR");
     },
-    exportar() {
-      window.open(
-        `http://localhost:4000/api/bitacora/exportar?token=${ApiClient.getToken()}`,
-        "_blank"
-      );
+    // Descarga la bitacora completa (HU-09). La peticion envia el token en el
+    // encabezado Authorization, igual que el resto de la API, en lugar de
+    // ponerlo en la URL.
+    async exportar() {
+      this.errorMsg = "";
+      try {
+        const response = await fetch(`${API_BASE_URL}/bitacora/exportar`, {
+          headers: { Authorization: `Bearer ${ApiClient.getToken()}` },
+        });
+        if (!response.ok) {
+          throw new Error(`No fue posible exportar la bitacora (${response.status})`);
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "bitacora_zenith.json";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        this.errorMsg = error.message;
+      }
     },
   },
   template: `
     <div>
-      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h4><i class="bi bi-journal-text me-2"></i>Bitacora Tecnica</h4>
-        <div class="d-flex gap-2">
-          <select class="form-select form-select-sm" v-model="filterClient" style="width:220px">
-            <option value="">Todos los clientes</option>
-            <option v-for="c in clients" :key="c._id" :value="c._id">{{ c.name }}</option>
-          </select>
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 action-toolbar">
+        <h4 class="mb-0"><i class="bi bi-journal-text me-2"></i>Bitacora Tecnica</h4>
+        <div class="d-flex flex-wrap gap-2 action-buttons">
+          <button class="btn btn-outline-secondary" @click="exportar">
+            <i class="bi bi-download me-1"></i>Exportar bitacora
+          </button>
           <button class="btn btn-primary" @click="openCreateModal">
-            <i class="bi bi-plus-lg"></i> Nueva interaccion
+            <i class="bi bi-plus-lg me-1"></i>Nueva interaccion
           </button>
         </div>
       </div>
@@ -97,21 +142,42 @@ const BitacoraView = {
 
       <div v-if="loading" class="text-center py-4"><span class="spinner-border"></span></div>
 
-      <div v-else class="list-group shadow-sm">
-        <div v-if="filteredEntries.length === 0" class="text-center text-muted py-4 bg-white rounded">
-          No hay interacciones registradas
-        </div>
-        <div class="list-group-item" v-for="entry in filteredEntries" :key="entry._id">
-          <div class="d-flex justify-content-between">
-            <div>
-              <span class="badge bg-primary me-2">{{ entry.type }}</span>
-              <strong>{{ entry.client ? entry.client.name : 'Cliente eliminado' }}</strong>
-            </div>
-            <small class="text-muted">{{ formatDate(entry.createdAt) }}</small>
+      <div v-else class="bg-white rounded shadow-sm p-2">
+        <div class="d-flex flex-wrap gap-2 align-items-center p-2 table-toolbar">
+          <div class="input-group input-group-sm" style="max-width: 300px">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por descripcion, tipo o cliente"
+              v-model="searchQuery"
+            />
           </div>
-          <p class="mb-1 mt-2">{{ entry.description }}</p>
-          <small class="text-muted">Registrado por: {{ entry.user ? entry.user.name : 'N/D' }}</small>
+          <select class="form-select form-select-sm" style="max-width: 220px" v-model="filterClient">
+            <option value="">Todos los clientes</option>
+            <option v-for="c in clients" :key="c._id" :value="c._id">{{ c.name }}</option>
+          </select>
+          <span class="text-muted small ms-auto">{{ filteredEntries.length }} interaccion(es) encontrada(s)</span>
         </div>
+
+        <div class="list-group list-group-flush">
+          <div v-if="filteredEntries.length === 0" class="text-center text-muted py-4">
+            No se encontraron interacciones con los filtros seleccionados
+          </div>
+          <div class="list-group-item" v-for="entry in paginatedEntries" :key="entry._id">
+            <div class="d-flex justify-content-between flex-wrap gap-1">
+              <div>
+                <span class="badge bg-primary me-2">{{ entry.type }}</span>
+                <strong>{{ entry.client ? entry.client.name : 'Cliente eliminado' }}</strong>
+              </div>
+              <small class="text-muted">{{ formatDate(entry.createdAt) }}</small>
+            </div>
+            <p class="mb-1 mt-2">{{ entry.description }}</p>
+            <small class="text-muted">Registrado por: {{ entry.user ? entry.user.name : 'N/D' }}</small>
+          </div>
+        </div>
+
+        <pagination-bar :current-page="currentPage" :total-pages="totalPages" @change="currentPage = $event"></pagination-bar>
       </div>
 
       <!-- Modal nueva interaccion -->
@@ -141,8 +207,8 @@ const BitacoraView = {
                   <label class="form-label">Descripcion / minuta *</label>
                   <textarea class="form-control" rows="4" v-model="form.description" required></textarea>
                 </div>
-                <div class="text-end">
-                  <button type="button" class="btn btn-secondary me-2" @click="showModal = false">Cancelar</button>
+                <div class="text-end action-buttons d-flex justify-content-end">
+                  <button type="button" class="btn btn-secondary" @click="showModal = false">Cancelar</button>
                   <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
               </form>
