@@ -6,7 +6,7 @@ const app = require("../app");
 
 afterEach(() => jest.clearAllMocks());
 
-describe("Modulo de Alertas de Mantenimiento (HU-10, HU-11, HU-12)", () => {
+describe("Modulo de Alertas de Mantenimiento (HU-10, HU-11)", () => {
   it("genera una alerta para un contrato proximo a vencer (HU-10)", async () => {
     const token = mockAuthUser({ role: "administrador" });
 
@@ -42,7 +42,7 @@ describe("Modulo de Alertas de Mantenimiento (HU-10, HU-11, HU-12)", () => {
     expect(res.statusCode).toBe(403);
   });
 
-  it("no genera alertas duplicadas para el mismo contrato (HU-12)", async () => {
+  it("no genera alertas duplicadas para el mismo contrato (HU-10)", async () => {
     const token = mockAuthUser({ role: "administrador" });
 
     const contratoFalso = {
