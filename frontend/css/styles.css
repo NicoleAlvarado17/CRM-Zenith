@@ -50,9 +50,33 @@ a,
   color: #ffffff !important;
 }
 
+/* Comentario de evaluacion: separar las opciones de menu y mejorar el hover
+   (que no sea solo una linea verde debajo del texto). Cada opcion ahora es
+   una pastilla independiente, con separacion clara y un cambio de fondo
+   notorio tanto en hover como en el item activo. */
+.navbar-zenith .nav-link {
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.navbar-zenith .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff !important;
+}
+
 .navbar-zenith .nav-link.active {
-  font-weight: 600;
-  border-bottom: 2px solid var(--zenith-accent);
+  background-color: var(--zenith-accent);
+  border-color: var(--zenith-accent);
+  color: var(--zenith-primary-dark) !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-zenith .nav-tabs-wrapper {
+  gap: 0.5rem;
 }
 
 .login-wrapper {
@@ -117,6 +141,60 @@ a,
 
 .role-badge {
   text-transform: capitalize;
+}
+
+/* Comentario de evaluacion: tablas y listados con paginacion, filtros y buscador */
+.table-toolbar .input-group-text {
+  background-color: #ffffff;
+}
+
+.pagination .page-link {
+  color: var(--zenith-primary);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--zenith-primary);
+  border-color: var(--zenith-primary);
+}
+
+/* Comentario de evaluacion: organizar mejor los botones de accion en pantallas pequenas */
+.action-toolbar {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.action-buttons {
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+/* Comentario de evaluacion: arrastrar y soltar en el pipeline comercial */
+.pipeline-card-draggable {
+  cursor: grab;
+}
+
+.pipeline-card-draggable:active {
+  cursor: grabbing;
+}
+
+.pipeline-column.drag-over {
+  background-color: #eef6ff;
+  border-color: var(--zenith-primary);
+  border-style: dashed;
+}
+
+.pipeline-card.dragging {
+  opacity: 0.5;
+}
+
+/* Comentario de evaluacion: modulo de reportes mas visual (graficos, KPIs) */
+.chart-card canvas {
+  max-height: 260px;
+}
+
+.kpi-trend {
+  font-size: 0.85rem;
 }
 /* ========================================================= */
 /* Diseno responsive (T-03) - Sprint 2                         */
@@ -186,6 +264,22 @@ a,
 
 .modal-dialog {
   margin: 0.75rem;
+}
+
+/* En telefonos los botones de la barra de acciones ocupan todo el ancho
+   disponible y se reparten de forma pareja en vez de quedar desalineados */
+.action-toolbar > .btn,
+.action-toolbar > .action-buttons {
+  width: 100%;
+}
+
+.action-toolbar > .action-buttons > .btn {
+  flex: 1 1 auto;
+}
+
+.table-toolbar .input-group,
+.table-toolbar .form-select {
+  max-width: 100% !important;
 }
 }
 
