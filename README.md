@@ -13,7 +13,8 @@ Este repositorio implementa técnicamente la arquitectura definida en el Documen
 | Gestión de Clientes | HU-01, HU-02, HU-03 | 1 | ✅ Entregado |
 | Pipeline Comercial | HU-04, HU-05, HU-06 | 2 | ✅ Entregado |
 | Bitácora Técnica | HU-07, HU-08, HU-09 | 3 | ✅ Entregado |
-| Alertas de Mantenimiento | HU-10, HU-11, HU-12 | 3 | ✅ Entregado |
+| Alertas de Mantenimiento | HU-10, HU-11 | 3 | ✅ Entregado |
+| Reporte de alertas | HU-12 | 4 | 🔜 Planificado |
 | Reportes | HU-13, HU-14, HU-15 | 4 | 🔜 Planificado |
 
 > El código base del repositorio incluye un primer borrador de todos los módulos para validar la arquitectura de forma temprana, pero cada módulo se revisa, prueba y documenta formalmente en el sprint que le corresponde según la Tabla de planificación del proyecto. El estado de esta tabla refleja ese avance formal por sprint, no el código presente en el repositorio.
@@ -112,7 +113,7 @@ npm test
 | `tests/auth.test.js` | Inicio de sesión, credenciales inválidas y acceso sin token |
 | `tests/clients.test.js` | Registro de clientes, permisos por rol y correo duplicado (HU-01, HU-02) |
 | `tests/bitacora.test.js` | Registro, filtro por cliente y consulta de interacciones (HU-07, HU-08, HU-09) |
-| `tests/alerts.test.js` | Generación de alertas, alertas duplicadas y marcar como atendida (HU-10, HU-11, HU-12) |
+| `tests/alerts.test.js` | Generación de alertas, alertas duplicadas y marcar como atendida (HU-10, HU-11) |
 
 ## Roles y permisos (RNF01 / Seguridad)
 
