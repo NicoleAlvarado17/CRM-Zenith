@@ -12,8 +12,8 @@ Este repositorio implementa técnicamente la arquitectura definida en el Documen
 |---|---|---|---|
 | Gestión de Clientes | HU-01, HU-02, HU-03 | 1 | ✅ Entregado |
 | Pipeline Comercial | HU-04, HU-05, HU-06 | 2 | ✅ Entregado |
-| Bitácora Técnica | HU-07, HU-08, HU-09 | 3 | 🔜 Planificado |
-| Alertas de Mantenimiento | HU-10, HU-11, HU-12 | 3 | 🔜 Planificado |
+| Bitácora Técnica | HU-07, HU-08, HU-09 | 3 | ✅ Entregado |
+| Alertas de Mantenimiento | HU-10, HU-11, HU-12 | 3 | ✅ Entregado |
 | Reportes | HU-13, HU-14, HU-15 | 4 | 🔜 Planificado |
 
 > El código base del repositorio incluye un primer borrador de todos los módulos para validar la arquitectura de forma temprana, pero cada módulo se revisa, prueba y documenta formalmente en el sprint que le corresponde según la Tabla de planificación del proyecto. El estado de esta tabla refleja ese avance formal por sprint, no el código presente en el repositorio.
@@ -28,7 +28,9 @@ crm-zenith/
 │   ├── routes/        # Endpoints de la API organizados por módulo
 │   ├── middleware/     # Autenticación (JWT), autorización por roles, manejo de errores
 │   ├── utils/          # Generación de token, bitácora de auditoría, alertas automáticas, seed
-│   └── server.js
+│   ├── tests/          # Pruebas automatizadas de la API (Jest + Supertest)
+│   ├── app.js          # Configuración de Express (rutas y middlewares)
+│   └── server.js       # Arranque: conexión a la base de datos y puerto
 ├── frontend/          # Interfaz web (Vue 3 + Bootstrap 5, sin build step)
 │   ├── css/
 │   ├── js/             # Componentes Vue por módulo + conexión a la API
@@ -96,6 +98,22 @@ El frontend no requiere instalación ni build: es HTML/CSS/JS puro que consume l
 
 Si su servidor backend corre en un puerto distinto a 4000, actualice la constante `API_BASE_URL` en `frontend/js/api.js`.
 
+## Pruebas automatizadas
+
+El backend incluye pruebas de la API escritas con Jest y Supertest. Los modelos de Mongoose se simulan dentro de las pruebas, por lo que no hace falta una base de datos ni conexión a internet para ejecutarlas.
+
+```bash
+cd backend
+npm test
+```
+
+| Archivo | Qué verifica |
+|---|---|
+| `tests/auth.test.js` | Inicio de sesión, credenciales inválidas y acceso sin token |
+| `tests/clients.test.js` | Registro de clientes, permisos por rol y correo duplicado (HU-01, HU-02) |
+| `tests/bitacora.test.js` | Registro, filtro por cliente y consulta de interacciones (HU-07, HU-08, HU-09) |
+| `tests/alerts.test.js` | Generación de alertas, alertas duplicadas y marcar como atendida (HU-10, HU-11, HU-12) |
+
 ## Roles y permisos (RNF01 / Seguridad)
 
 | Acción | Administrador | Técnico | Comercial |
@@ -122,8 +140,8 @@ El servidor revisa automáticamente, cada 6 horas, los contratos de mantenimient
 
 ## Próximos pasos sugeridos
 
-- Desplegar el backend en Render o Railway y la base de datos en MongoDB Atlas (ver sección 4.6.2 del Documento de Arquitectura).
-- Agregar pruebas automatizadas (unitarias e integración).
+- Revisar y documentar formalmente el módulo de Reportes (Sprint 4).
+- Ampliar las pruebas automatizadas a los módulos de Pipeline Comercial y Reportes.
 - Incorporar recuperación de contraseña y confirmación por correo electrónico.
 
 ## Referencias
