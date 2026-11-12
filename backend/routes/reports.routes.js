@@ -14,7 +14,7 @@ router.get("/sales", async (req, res, next) => {
     const opportunities = await Opportunity.find({ stage: "Ganado" }).populate("client", "name");
 
     if (opportunities.length === 0) {
-      return res.json({ message: "No hay ventas registradas", total: 0, opportunities: [] });
+      return res.json({ message: "No hay ventas registradas", totalVentas: 0, montoTotal: 0, opportunities: [] });
     }
 
     const total = opportunities.reduce((sum, op) => sum + (op.amount || 0), 0);
