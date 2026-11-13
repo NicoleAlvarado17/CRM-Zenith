@@ -283,6 +283,78 @@ a,
 }
 }
 
+/* Comentario de evaluacion: las tablas no se cortan en pantallas pequenas.
+   Por debajo de 768px cada fila se convierte en una tarjeta con sus etiquetas. */
+@media (max-width: 767.98px) {
+  .table-stack thead {
+    display: none;
+  }
+
+  .table-stack,
+  .table-stack tbody,
+  .table-stack tr,
+  .table-stack td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-stack tbody tr {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background-color: #ffffff;
+  }
+
+  .table-stack td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border: 0;
+    padding: 0.3rem 0;
+    text-align: right !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    overflow-wrap: anywhere;
+  }
+
+  .table-stack td::before {
+    content: attr(data-label);
+    flex: 0 0 34%;
+    max-width: 34%;
+    text-align: left;
+    font-weight: 600;
+    color: #6c757d;
+  }
+
+  .table-stack td[colspan] {
+    display: block;
+    text-align: center !important;
+  }
+
+  .table-stack td[colspan]::before {
+    content: none;
+  }
+
+  .table-stack td.cell-actions {
+    display: block;
+    padding-top: 0.5rem;
+  }
+
+  .table-stack td.cell-actions::before {
+    content: none;
+  }
+
+  .table-stack .action-buttons {
+    justify-content: stretch;
+  }
+
+  .table-stack .action-buttons > .btn {
+    flex: 1 1 auto;
+  }
+}
+
 @media (min-width: 1200px) {
   .pipeline-row > .col {
     max-width: 260px;
