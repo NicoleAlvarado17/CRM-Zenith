@@ -92,7 +92,7 @@ const NavBar = {
       </div>
       <div class="ms-auto d-flex align-items-center text-white">
         <span class="badge bg-light text-dark role-badge me-2">{{ user.role }}</span>
-        <span class="me-3">{{ user.name }}</span>
+        <span class="me-3 text-nowrap">{{ user.name }}</span>
         <button class="btn btn-sm btn-outline-light" @click="onLogout">
           <i class="bi bi-box-arrow-right"></i> Salir
         </button>

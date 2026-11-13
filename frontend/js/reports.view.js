@@ -13,6 +13,7 @@ const ReportsView = {
       salesChartInstance: null,
       maintenanceChartInstance: null,
       activeStageChartInstance: null,
+      chartError: "",
       // Buscador y paginacion del detalle de ventas cerradas
       salesSearch: "",
       salesPage: 1,
@@ -85,6 +86,13 @@ const ReportsView = {
       this.renderCharts();
     },
     renderCharts() {
+      // Si la libreria de graficos no cargo (sin internet o CDN bloqueado) se avisa
+      // en pantalla en lugar de dejar los cuadros vacios.
+      if (typeof Chart === "undefined") {
+        this.chartError = "No se pudo cargar la libreria de graficos. Revise su conexion y recargue la pagina.";
+        return;
+      }
+      this.chartError = "";
       this.renderSalesChart();
       this.renderMaintenanceChart();
       this.renderActiveStageChart();
@@ -197,6 +205,7 @@ const ReportsView = {
     <div>
       <h4 class="mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Reportes</h4>
       <div v-if="errorMsg" class="alert alert-danger py-2">{{ errorMsg }}</div>
+      <div v-if="chartError" class="alert alert-warning py-2">{{ chartError }}</div>
       <div v-if="loading" class="text-center py-4"><span class="spinner-border"></span></div>
 
       <div v-else class="row g-3">
@@ -252,39 +261,48 @@ const ReportsView = {
         </div>
 
         <!-- Graficos (correccion de evaluacion: modulo mas visual para apoyar decisiones) -->
-        <div class="col-md-6" v-if="sales.opportunities && sales.opportunities.length">
+        <div class="col-md-6">
           <div class="card chart-card p-3 h-100">
             <h6 class="mb-2">Ventas por cliente</h6>
-            <div style="position: relative; height: 260px">
+            <div v-if="sales.opportunities && sales.opportunities.length" style="position: relative; height: 260px">
               <canvas ref="salesChartCanvas"></canvas>
             </div>
-          </div>
-        </div>
-
-        <div class="col-md-6" v-if="!maintenance.message">
-          <div class="card chart-card p-3 h-100">
-            <h6 class="mb-2">Distribucion de contratos de mantenimiento</h6>
-            <div style="position: relative; height: 260px">
-              <canvas ref="maintenanceChartCanvas"></canvas>
+            <div v-else class="text-muted small py-4 text-center">
+              <i class="bi bi-bar-chart me-1"></i>Aun no hay ventas ganadas para graficar.
             </div>
           </div>
         </div>
 
-        <div class="col-md-6" v-if="Array.isArray(activeOpportunities) && activeOpportunities.length">
+        <div class="col-md-6">
+          <div class="card chart-card p-3 h-100">
+            <h6 class="mb-2">Distribucion de contratos de mantenimiento</h6>
+            <div v-if="!maintenance.message" style="position: relative; height: 260px">
+              <canvas ref="maintenanceChartCanvas"></canvas>
+            </div>
+            <div v-else class="text-muted small py-4 text-center">
+              <i class="bi bi-pie-chart me-1"></i>Aun no hay contratos de mantenimiento para graficar.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
           <div class="card chart-card p-3 h-100">
             <h6 class="mb-2">Oportunidades activas por etapa</h6>
-            <div style="position: relative; height: 260px">
+            <div v-if="Array.isArray(activeOpportunities) && activeOpportunities.length" style="position: relative; height: 260px">
               <canvas ref="activeStageChartCanvas"></canvas>
+            </div>
+            <div v-else class="text-muted small py-4 text-center">
+              <i class="bi bi-kanban me-1"></i>Aun no hay oportunidades activas para graficar.
             </div>
           </div>
         </div>
 
         <!-- Detalle de ventas cerradas, con buscador, paginacion y descarga -->
-        <div class="col-12" v-if="sales.opportunities && sales.opportunities.length">
+        <div class="col-12">
           <div class="card p-3">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 action-toolbar">
               <h6 class="mb-0">Detalle de ventas cerradas</h6>
-              <button class="btn btn-sm btn-outline-secondary" @click="descargarVentasCSV">
+              <button class="btn btn-sm btn-outline-secondary" @click="descargarVentasCSV" :disabled="!(sales.opportunities && sales.opportunities.length)">
                 <i class="bi bi-download me-1"></i>Descargar CSV
               </button>
             </div>
@@ -298,16 +316,18 @@ const ReportsView = {
             </div>
 
             <div class="table-responsive">
-              <table class="table table-sm table-hover align-middle mb-0">
+              <table class="table table-sm table-hover align-middle mb-0 table-stack">
                 <thead><tr><th>Cliente</th><th>Titulo</th><th>Monto</th></tr></thead>
                 <tbody>
                   <tr v-if="filteredSalesOpportunities.length === 0">
-                    <td colspan="3" class="text-center text-muted py-3">Sin resultados para la busqueda</td>
+                    <td colspan="3" class="text-center text-muted py-3">
+                      {{ (sales.opportunities && sales.opportunities.length) ? 'Sin resultados para la busqueda' : 'Aun no hay ventas ganadas registradas' }}
+                    </td>
                   </tr>
                   <tr v-for="op in paginatedSalesOpportunities" :key="op._id">
-                    <td>{{ op.client ? op.client.name : 'N/D' }}</td>
-                    <td>{{ op.title }}</td>
-                    <td>{{ formatMoney(op.amount) }}</td>
+                    <td data-label="Cliente">{{ op.client ? op.client.name : 'N/D' }}</td>
+                    <td data-label="Titulo">{{ op.title }}</td>
+                    <td data-label="Monto">{{ formatMoney(op.amount) }}</td>
                   </tr>
                 </tbody>
               </table>

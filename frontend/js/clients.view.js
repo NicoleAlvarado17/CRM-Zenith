@@ -184,7 +184,7 @@ const ClientsView = {
         </div>
 
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
+          <table class="table table-hover align-middle mb-0 table-stack">
             <thead>
               <tr>
                 <th>Cliente</th>
@@ -202,14 +202,14 @@ const ClientsView = {
                 </td>
               </tr>
               <tr v-for="client in paginatedClients" :key="client._id">
-                <td class="fw-semibold">{{ client.name }}</td>
-                <td>{{ client.contactName || '-' }}</td>
-                <td>{{ client.email }}</td>
-                <td>{{ client.phone }}</td>
-                <td>
+                <td class="fw-semibold" data-label="Cliente">{{ client.name }}</td>
+                <td data-label="Contacto">{{ client.contactName || '-' }}</td>
+                <td data-label="Correo" class="cell-wrap">{{ client.email }}</td>
+                <td data-label="Telefono">{{ client.phone }}</td>
+                <td data-label="Servicios">
                   <span v-for="s in client.servicesContracted" :key="s" class="badge bg-secondary me-1">{{ s }}</span>
                 </td>
-                <td class="text-end">
+                <td class="text-end cell-actions">
                   <div class="d-flex action-buttons">
                     <button class="btn btn-sm btn-outline-info" @click="viewHistorial(client)">
                       <i class="bi bi-clock-history me-1"></i>Historial
