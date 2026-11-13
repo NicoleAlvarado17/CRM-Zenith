@@ -58,4 +58,13 @@ const zenithApp = Vue.createApp(App);
 // (clientes, bitacora, alertas, reportes) sin tener que declararla
 // como componente local en cada uno.
 zenithApp.component("pagination-bar", PaginationBar);
+// Etiqueta con la que se muestra a un usuario en pantalla: los roles tecnico y
+// comercial se identifican solo por el nombre del rol (sin nombre propio);
+// el administrador conserva su nombre.
+zenithApp.config.globalProperties.$userLabel = function (u) {
+  if (!u) return "N/D";
+  if (u.role === "tecnico") return "Tecnico";
+  if (u.role === "comercial") return "Comercial";
+  return u.name || "Administrador";
+};
 zenithApp.mount("#app");

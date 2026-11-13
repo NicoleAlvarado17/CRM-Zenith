@@ -310,7 +310,7 @@ const ClientsView = {
                   <li class="list-group-item" v-for="b in historial.bitacora" :key="b._id">
                     <strong>{{ b.type }}</strong> - {{ formatDate(b.createdAt) }}
                     <div class="text-muted small">{{ b.description }}</div>
-                    <div class="small">Registrado por: {{ b.user ? b.user.name : 'N/D' }}</div>
+                    <div class="small">Registrado por: {{ $userLabel(b.user) }}</div>
                   </li>
                 </ul>
                 <p v-else class="text-muted">Sin interacciones registradas.</p>

@@ -173,7 +173,7 @@ const BitacoraView = {
               <small class="text-muted">{{ formatDate(entry.createdAt) }}</small>
             </div>
             <p class="mb-1 mt-2">{{ entry.description }}</p>
-            <small class="text-muted">Registrado por: {{ entry.user ? entry.user.name : 'N/D' }}</small>
+            <small class="text-muted">Registrado por: {{ $userLabel(entry.user) }}</small>
           </div>
         </div>
 
