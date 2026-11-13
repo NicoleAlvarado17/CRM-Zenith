@@ -74,11 +74,19 @@ router.get("/exportar", checkRole("administrador", "tecnico"), async (req, res, 
   try {
     const entries = await BitacoraEntry.find()
       .populate("client", "name")
-      .populate("user", "name");
+      .populate("user", "name role");
+
+    // Los usuarios tecnico y comercial se identifican solo por su rol: el nombre
+    // propio no se incluye en el archivo exportado.
+    const data = entries.map((entry) => {
+      const item = typeof entry.toObject === "function" ? entry.toObject() : entry;
+      if (item.user && item.user.role !== "administrador") delete item.user.name;
+      return item;
+    });
 
     res.setHeader("Content-Disposition", "attachment; filename=bitacora_zenith.json");
     res.setHeader("Content-Type", "application/json");
-    res.send(JSON.stringify(entries, null, 2));
+    res.send(JSON.stringify(data, null, 2));
   } catch (error) {
     next(error);
   }
