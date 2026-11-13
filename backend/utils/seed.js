@@ -32,8 +32,8 @@ async function seed() {
 
   // 2. Usuarios de ejemplo: tecnico y comercial
   const usuariosEjemplo = [
-    { name: "Sofia Arana", email: "tecnico@zenith.com", password: "Tecnico123!", role: "tecnico" },
-    { name: "Valery Vargas", email: "comercial@zenith.com", password: "Comercial123!", role: "comercial" },
+    { name: "Tecnico 1", email: "tecnico@zenith.com", password: "Tecnico123!", role: "tecnico" },
+    { name: "Comercial 1", email: "comercial@zenith.com", password: "Comercial123!", role: "comercial" },
   ];
 
   for (const u of usuariosEjemplo) {
@@ -41,6 +41,11 @@ async function seed() {
     if (!existe) {
       await User.create(u);
       console.log(`Usuario de ejemplo creado -> correo: ${u.email} / rol: ${u.role}`);
+    } else if (existe.name !== u.name) {
+      // Si el usuario ya existe solo se actualiza el nombre visible; la contrasena no se toca.
+      existe.name = u.name;
+      await existe.save();
+      console.log(`Nombre actualizado -> correo: ${u.email} / nombre: ${u.name}`);
     }
   }
 
